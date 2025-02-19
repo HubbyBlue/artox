@@ -1,5 +1,5 @@
 -- heeelllppp
-queue_on_teleport(game:HttpGet("https://raw.githubusercontent.com/Blazuno/deepstuff/refs/heads/main/layer2bot.lua"))
+queue_on_teleport(game:HttpGet("https://raw.githubusercontent.com/HubbyBlue/artox/refs/heads/main/layer2bot.lua"))
 repeat wait() until game:IsLoaded()
 wait(5)
 local VIM = game:GetService("VirtualInputManager")
@@ -21,8 +21,12 @@ end
 
 
 spawn(function()
-    local start_time =
-    repeat wait() until
+    local start_time = os.clock()
+    repeat wait() until os.clock() - start_time >= 300
+    repeat
+        wait(5)
+        game.ReplicatedStorage.Requests.ReturnToMenu:FireServer(nil)
+    until false
 end)
 
 --localized vars
