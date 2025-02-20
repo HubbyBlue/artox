@@ -11,8 +11,10 @@ local function mb_1()
 end
 
 if game.PlaceId == 4111023553 then
-    game.ReplicatedStorage.Requests.StartMenu.Start:FireServer(slot, {})
-    wait(3)
+    repeat
+        game.ReplicatedStorage.Requests.StartMenu.Start:FireServer(slot, {})
+        wait(3)
+    until false
 elseif game.PlaceId == 8668476218 then 
     wait(7)
     mb_1()
