@@ -56,11 +56,6 @@ local positions = {
     Vector3.new(-4595.3955078125, 644.717529296875, -5156.9619140625) -- chaser
 }
 
-local items = {
-    "Weathered Timepiece",
-    "Bloodforged Crown",
-    "Bloodfouler"
-}
 
 
 
@@ -149,11 +144,19 @@ local function delete_chaser()
     game.Workspace.CurrentCamera.CFrame = CFrame.lookAt(game.Workspace.CurrentCamera.CFrame.Position, chaser.Torso.Position)
     wait(0.5)
     local mouse_pos = game.Workspace.CurrentCamera:WorldToViewportPoint(torso.Position)
-    wait(0.1)
     VIM:SendMouseMoveEvent(mouse_pos.X, mouse_pos.Y, game)
     wait(0.05)
     cast_remote:FireServer(galetrap)
-    wait(1.5)
+    local trap
+    repeat trap = game.Workspace.Thrown:FindFirstChild("WindTrap") wait() until trap
+    repeat wait() until trap:FindFirstChild("Weld")
+    repeat
+        trap.Hitbox.CFrame = chr.HumanoidRootPart.CFrame
+        chaser.HumanoidRootPart.CFrame = CFrame.new(0, -20000, 0)
+        wait()
+    until not trap
+    wait(1)
+    
 end
 
 --delete bonekeeper
