@@ -3,6 +3,7 @@ queue_on_teleport(game:HttpGet("https://raw.githubusercontent.com/HubbyBlue/arto
 repeat wait() until game:IsLoaded()
 wait(5)
 local VIM = game:GetService("VirtualInputManager")
+local items = _G.items
 
 local function mb_1()
     VIM:SendMouseButtonEvent(game.Workspace.CurrentCamera.ViewportSize.X/2, game.Workspace.CurrentCamera.ViewportSize.Y/2, 0, true, game, 1)
@@ -12,7 +13,7 @@ end
 
 if game.PlaceId == 4111023553 then
     repeat
-        game.ReplicatedStorage.Requests.StartMenu.Start:FireServer(slot, {})
+        game.ReplicatedStorage.Requests.StartMenu.Start:FireServer(_G.slot, {})
         wait(3)
     until false
 elseif game.PlaceId == 8668476218 then 
@@ -23,8 +24,8 @@ end
 
 
 spawn(function()
-    local start_time = os.clock()
-    repeat wait() until os.clock() - start_time >= 300
+    local start_time = os.time()
+    repeat wait() until os.time() - start_time >= 300
     repeat
         wait(5)
         game.ReplicatedStorage.Requests.ReturnToMenu:FireServer(nil)
