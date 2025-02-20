@@ -175,7 +175,7 @@ local function delete_bonekeeper()
         repeat spear = game.Workspace.Thrown:FindFirstChild("BoneSpear") wait() until spear
         repeat
             boy.HumanoidRootPart.CFrame = CFrame.new(0, -20000, 0)
-            spear.CFrame = chr.HumanoidRootPart
+            spear.CFrame = chr.HumanoidRootPart.CFrame
             wait()
         until not spear
     end)
