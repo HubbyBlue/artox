@@ -1,9 +1,14 @@
 -- heeelllppp
+print("Blazehub is back babyyyyyyy, l2 bot go!")
+
 queue_on_teleport(game:HttpGet("https://raw.githubusercontent.com/HubbyBlue/artox/refs/heads/main/layer2bot.lua"))
 repeat wait() until game:IsLoaded()
-wait(5)
+
+local settings = game:GetService("HttpService"):JSONDecode(readfile("blazehub.txt"))
+print("Loaded settings:", unpack(settings))
 local VIM = game:GetService("VirtualInputManager")
-local items = _G.items
+local slot = settings.slot
+local items = settings.items
 
 local function mb_1()
     VIM:SendMouseButtonEvent(game.Workspace.CurrentCamera.ViewportSize.X/2, game.Workspace.CurrentCamera.ViewportSize.Y/2, 0, true, game, 1)
@@ -13,13 +18,14 @@ end
 
 if game.PlaceId == 4111023553 then
     repeat
-        game.ReplicatedStorage.Requests.StartMenu.Start:FireServer(_G.slot, {})
+        game.ReplicatedStorage.Requests.StartMenu.Start:FireServer(slot, {})
         wait(3)
     until false
 elseif game.PlaceId == 8668476218 then 
-    wait(7)
+    wait(5)
     mb_1()
-    wait(25)
+    wait(3)
+    repeat wait() print("Current HP:", game.Players.LocalPlayer.Character.Humanoid.Health / game.Players.LocalPlayer.Character.Humanoid.MaxHealth) until game.Players.LocalPlayer.Character.Humanoid.Health / game.Players.LocalPlayer.Character.Humanoid.MaxHealth > 0.85
 end
 
 
@@ -46,7 +52,8 @@ local positions = {
     Vector3.new(-5493.36669921875, 383.2544250488281, -5819.6513671875),
     Vector3.new(-5698.533203125, 402.0506286621094, -6069.64013671875),
     Vector3.new(-5983.35693359375, 443.8338623046875, -6298.9658203125),
-    Vector3.new(-5746.16064453125, 459.4011535644531, -6364.5498046875), -- bonekeeper
+    Vector3.new(-5790.96044921875, 459.401123046875, -6343.06396484375), -- pre bonekeeper
+    Vector3.new(-5790.96044921875, 459.401123046875, -6343.06396484375), -- bonekeeper
     Vector3.new(-5557.0380859375, 529.257568359375, -6477.33984375),-- generator
     Vector3.new(-5698.533203125, 402.0506286621094, -6069.64013671875),
     Vector3.new(-5452.01025390625, 353.6543884277344, -5654.0517578125),
@@ -117,7 +124,6 @@ local function nofall()
             return oldfs(...)
         end
     end))
-
 end
 
 
@@ -138,11 +144,46 @@ local function fly_to(goal, speed, look)
     return tween
 end
 
+-- uses fly_to() and implements anti rubber banding
+local function better_fly(goal, speed, look)
+    local tween = fly_to(goal, speed, look)
+    local start_time = os.time()
+    local old_pos = chr.HumanoidRootPart.Position
+    local failed = false
+    local thread = task.spawn(function()
+        while true do
+            wait()
+            if (old_pos - chr.HumanoidRootPart.Position).Magnitude <= 50 then 
+                old_pos = chr.HumanoidRootPart.Position
+            else 
+                print("detected rubber banding, retrying")
+                failed = true 
+                return
+            end
+        end
+    end)
+    wait(tween.TweenInfo.Time)
+    task.cancel(thread)
+    wait(0.1)
+    if (chr.HumanoidRootPart.Position - goal).Magnitude >=10 then failed = true end
+    if failed then return better_fly(goal, speed, look) end
+end
+
 --delete chaser
 local function delete_chaser()
     local chaser = game.Workspace.Live:FindFirstChild(".chaser")
     local torso = chaser.Torso
     local tween = fly_to(chaser.Torso.Position + Vector3.new(5,0,5), 100, chaser.Torso.Position)
+    game.Workspace.Thrown.ChildAdded:Connect(function(c)
+        if c.Name == "PerilousAttack" then 
+            wait(0.5)
+            VIM:SendKeyEvent(true, 113, false, game)
+            wait(0.05)
+            VIM:SendKeyEvent(false, 113, false, game)
+        elseif c.Name == "SpikeStabEff" then  
+            wait(0.8)
+        end
+    end)
     wait(tween.TweenInfo.Time)
     game.Workspace.CurrentCamera.CFrame = CFrame.lookAt(game.Workspace.CurrentCamera.CFrame.Position, chaser.Torso.Position)
     wait(0.5)
@@ -150,19 +191,16 @@ local function delete_chaser()
     VIM:SendMouseMoveEvent(mouse_pos.X, mouse_pos.Y, game)
     wait(0.05)
     cast_remote:FireServer(galetrap)
-    local trap
-    repeat trap = game.Workspace.Thrown:FindFirstChild("WindTrap") wait() until trap
-    repeat wait() until trap:FindFirstChild("Weld")
-    repeat
-        trap.Hitbox.CFrame = chr.HumanoidRootPart.CFrame
-        chaser.HumanoidRootPart.CFrame = CFrame.new(0, -20000, 0)
-        wait()
-    until not trap
-    wait(1)
-    
+    wait(2)
+    if chaser then 
+        fly_to(Vector3.new(-4598.4892578125, 755.0444946289062, -5154.6220703125), 200)
+        repeat wait() until not game.Workspace.Live:FindFirstChild(".chaser")
+        print("Chaser dead")
+    end
 end
 
---delete bonekeeper
+
+-- delete bonekeeper
 local function delete_bonekeeper()
     local spear
     local boy
@@ -170,41 +208,41 @@ local function delete_bonekeeper()
     local point1 = Vector3.new(-5724.9404296875, 459.401123046875, -6368.80224609375)
     local point2 = Vector3.new(-5880.5888671875, 459.4011535644531, -6312.36376953125)
     local point3 = Vector3.new(-5808.74853515625, 375.5366516113281, -6352.9912109375)
-
-    spawn(function()
-        repeat spear = game.Workspace.Thrown:FindFirstChild("BoneSpear") wait() until spear
-        repeat
-            boy.HumanoidRootPart.CFrame = CFrame.new(0, -20000, 0)
-            spear.CFrame = chr.HumanoidRootPart.CFrame
+    wait(0.7)
+    chr.HumanoidRootPart.CFrame = CFrame.new(boy.HumanoidRootPart.Position + boy.HumanoidRootPart.CFrame.LookVector * Vector3.new(1,0,1) * 10, boy.HumanoidRootPart.Position)
+    VIM:SendKeyEvent(true, 114, false, game)
+    wait(0.05)
+    VIM:SendKeyEvent(false, 114, false, game)
+    wait(2)
+    if boy:FindFirstChild("HumanoidRootPart") then 
+        local cd = false
+        game.Workspace.Thrown.ChildAdded:Connect(function(c)
+            if c.Name == "Bone" and not cd then
+                wait(0.2)
+                VIM:SendKeyEvent(true, 32, false, game)
+                wait(0.05)
+                VIM:SendKeyEvent(false, 32, false, game)
+                cd = true
+                wait(2)
+                cd = false
+            end
+        end)
+        
+        local switch = false
+        while boy:FindFirstChild("HumanoidRootPart") do
             wait()
-        until not spear
-    end)
-
-    local cd = false
-    game.Workspace.Thrown.ChildAdded:Connect(function(c)
-        if c.Name == "Bone" and not cd then
-            wait(0.2)
-            VIM:SendKeyEvent(true, 32, false, game)
-            wait(0.05)
-            VIM:SendKeyEvent(false, 32, false, game)
-            cd = true
-            wait(2)
-            cd = false
-        end
-    end)
-
-    local switch = false
-    while boy do
-        wait()
-        if (boy.HumanoidRootPart.Position - chr.HumanoidRootPart.Position).Magnitude <= 35 then
-            fly_to(point3, 225)
-            wait(2)
-            if switch then
-                fly_to(point1, 225)
-                switch = false
-            else
-                fly_to(point2, 225)
-                switch = true
+            if boy:FindFirstChild("HumanoidRootPart") then
+                if (boy.HumanoidRootPart.Position - chr.HumanoidRootPart.Position).Magnitude <= 35 then
+                    fly_to(point3, 225)
+                    wait(2)
+                    if switch then
+                        fly_to(point1, 225)
+                        switch = false
+                    else
+                        fly_to(point2, 225)
+                        switch = true
+                    end
+                end
             end
         end
     end
@@ -215,11 +253,11 @@ local function destroy_jars()
     local destructibles = game.Workspace.Destructibles:GetChildren()
     for _, jar in pairs(destructibles) do
         if jar.Name == "BloodJar" and jar:FindFirstChild("AttachmentPart"):FindFirstChild("Attachment") and jar:FindFirstChild("AttachmentPart"):FindFirstChild("Attachment"):FindFirstChild("JarLight") then
-            local look = Vector3.new(jar.Part.Position.X, chr.HumanoidRootPart.Position.Y, jar.Part.Position.Z)
             local next = false
             spawn(function()
                 while not next do
-                    local tween = fly_to(jar.Part.Position + Vector3.new(7,0,7), 200, look)
+                    local look = Vector3.new(jar.Part.Position.X, chr.HumanoidRootPart.Position.Y, jar.Part.Position.Z)
+                    local tween = fly_to(jar.Part.Position + Vector3.new(4,0,4), 200, look)
                     wait(tween.TweenInfo.Time)
                 end
             end)
@@ -237,20 +275,17 @@ end
 local function layer2bot()
     repeat wait() until game:IsLoaded()   
     if game.PlaceId == 8668476218 then
-        mb_1()
-        wait(15)
+        wait(2)
         noclip(true)
         nofall()
+        void_mobs()
+        VIM:SendKeyEvent(true, 49, false, game)
+        wait(0.05)
+        VIM:SendKeyEvent(false, 49, false, game)
         chr.HumanoidRootPart.Anchored = true
         for _, point in pairs(positions) do
-            repeat 
-                local tween = fly_to(point, 250)
-                wait(tween.TweenInfo.Time)
-                if (chr.HumanoidRootPart.Position - point).Magnitude <= 5 then
-                    wait(1.5)
-                end
-            until (chr.HumanoidRootPart.Position - point).Magnitude <= 5 
-            if _ == 1 or _ == 2 or _ == 11  then
+            better_fly(point, 250)
+            if _ == 1 or _ == 2 or _ == 12  then
                 if _ == 2 then 
                     game.Workspace.CurrentCamera.CFrame = CFrame.lookAt(game.Workspace.CurrentCamera.CFrame.Position, Vector3.new(-5002.71533203125, 376.4448547363281, -5825.50927734375))
                 end
@@ -263,7 +298,7 @@ local function layer2bot()
                 wait(0.05)
                 VIM:SendKeyEvent(false, 49, false, game)
 
-            elseif _ == 8 then
+            elseif _ == 9 then
                 wait(1)
                 VIM:SendKeyEvent(true, 101, false, game)
                 wait(0.05)
@@ -276,20 +311,15 @@ local function layer2bot()
                 VIM:SendKeyEvent(true, 49, false, game)
                 wait(0.05)
                 VIM:SendKeyEvent(false, 49, false, game)
-            elseif _ == 7 then
-                wait(1) 
+            elseif _ == 8 then
                 delete_bonekeeper()
-            elseif _ == 15 then 
+            elseif _ == 16 then 
                 wait(6)
             end
         end
         local chaser = game.Workspace.Live:FindFirstChild(".chaser")
         chr.HumanoidRootPart.CFrame = CFrame.new(chr.HumanoidRootPart.Position, chaser.HumanoidRootPart.Position)
         wait(1.5)
-        VIM:SendKeyEvent(true, 49, false, game)
-        wait(0.05)
-        VIM:SendKeyEvent(false, 49, false, game)
-        wait(0.5)
         VIM:SendKeyEvent(true, 101, false, game)
         wait(0.05)
         VIM:SendKeyEvent(false, 101, false, game)
@@ -298,6 +328,8 @@ local function layer2bot()
         wait(0.05)
         VIM:SendKeyEvent(false, 49, false, game)
         wait(0.6)
+        chr.HumanoidRootPart.CFrame = CFrame.new(chr.HumanoidRootPart.Position, chaser.HumanoidRootPart.Position)
+        wait(0.2)
         mb_1()
         chr.HumanoidRootPart.Anchored = false
         repeat wait() until chaser.Torso.Position.Y >= 655
