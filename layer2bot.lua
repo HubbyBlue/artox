@@ -24,15 +24,8 @@ if game.PlaceId == 4111023553 then
 elseif game.PlaceId == 8668476218 then 
     wait(5)
     mb_1()
-    do
-        local finished = false
-        repeat 
-            wait() 
-            pcall(function()
-                finished = game.Players.LocalPlayer.Character:IsLoaded()
-            end)
-        until finished
-    end
+    repeat wait() until game.Workspace.Live:FindFirstChild(game.Players.LocalPlayer.Name)
+    wait(1)
     repeat wait() print("Current HP:", game.Players.LocalPlayer.Character.Humanoid.Health / game.Players.LocalPlayer.Character.Humanoid.MaxHealth) until game.Players.LocalPlayer.Character.Humanoid.Health / game.Players.LocalPlayer.Character.Humanoid.MaxHealth > 0.85
 end
 
