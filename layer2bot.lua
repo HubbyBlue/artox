@@ -127,8 +127,32 @@ local function nofall()
 end
 
 
+--void mobs
+local function void_mobs()
+    local live = game.Workspace.Live
+    live.ChildAdded:Connect(function(c)
+        repeat wait() until c:FindFirstChild("HumanoidRootPart")
+        firetouchinterest(chr.HumanoidRootPart, c.HumanoidRootPart, 0)
+        spawn(function()
+            repeat 
+                for _, part in pairs(c:GetChildren()) do 
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+                local bp = Instance.new("BodyVelocity")
+                bp.MaxForce = Vector3.new(0, math.huge, 0)
+                bp.P = math.huge
+                bp.Parent = c.HumanoidRootPart
+                bp.Velocity = Vector3.new(0, -20000, 0)
+                game:GetService("Debris"):AddItem(bp, 0.001)
+                wait()
+            until not c
+        end)    
+    end)
+end
 
---
+-- tweens with set speed
 local function fly_to(goal, speed, look)
     local ts = game:GetService("TweenService")
     local distance = (goal-chr.HumanoidRootPart.Position).Magnitude
