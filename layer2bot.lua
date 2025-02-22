@@ -340,6 +340,7 @@ local function layer2bot()
                 delete_bonekeeper()
             elseif _ == 16 then 
                 wait(6)
+                repeat wait() until game.Players.LocalPlayer.Character.Humanoid.Health / game.Players.LocalPlayer.Character.Humanoid.MaxHealth > 0.85
             end
         end
         local chaser = game.Workspace.Live:FindFirstChild(".chaser")
